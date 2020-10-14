@@ -90,6 +90,8 @@ public:
     double getFramerate() const;
     double getDeltaTime() const; 
 
+	std::vector<vec3> convertAngles(vec3 key0, vec3 key1);
+
 protected:
     AInterpolatorVec3(ASplineVec3::InterpolationType t);
 

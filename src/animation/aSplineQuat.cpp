@@ -130,7 +130,34 @@ void ASplineQuat::computeControlPoints(quat& startQuat, quat& endQuat)
 		//  for each cubic quaternion curve, then store the results in mCntrlPoints in same the same way 
 		//  as was used with the SplineVec implementation
 		//  Hint: use the SDouble, SBisect and Slerp to compute b1 and b2
+		if (segment == 0) {
+			q_1 = startQuat;
+		}
+		else {
+			q_1 = mKeys[segment - 1].second;
+		}
 
+		q0 = mKeys[segment].second;
+		q1 = mKeys[segment + 1].second;
+
+		if (segment == numKeys - 2) {
+			q2 = endQuat;
+		}
+		else {
+			q2 = mKeys[segment + 2].second;
+		}
+		
+		quat q0_D, q0_B, q1_D, q1_B;
+
+		q1_D = q1_D.SDouble(q_1, q0);
+		q1_B = q1_B.SBisect(q1_D, q1);
+		q0_D = q0_D.SDouble(q2, q1);
+		q0_B = q0_B.SBisect(q0, q0_D);
+
+		b0 = q0;
+		b1 = b1.Slerp(q0, q1_B, 1.0 / 3.0);
+		b2 = b2.Slerp(q1, q0_B, 1.0 / 3.0);
+		b3 = q1;
 
 		mCtrlPoints.push_back(b0);
 		mCtrlPoints.push_back(b1);
@@ -141,13 +168,16 @@ void ASplineQuat::computeControlPoints(quat& startQuat, quat& endQuat)
 
 quat ASplineQuat::getLinearValue(double t)
 {
-
 	quat q;
 	int segment = getCurveSegment(t);
 
 	// TODO: student implementation goes here
 	// compute the value of a linear quaternion spline at the value of t using slerp
+	double tPrev = mKeys[segment].first;
+	double tNext = mKeys[segment + 1].first;
+	double u = (t - tPrev) / (tNext - tPrev);
 
+	q = q.Slerp(mKeys[segment].second, mKeys[segment + 1].second, u);
 	return q;	
 }
 
@@ -167,7 +197,6 @@ void ASplineQuat::createSplineCurveLinear()
 	}
 }
 
-
 quat ASplineQuat::getCubicValue(double t)
 {
 	quat q, b0, b1, b2, b3;
@@ -175,6 +204,16 @@ quat ASplineQuat::getCubicValue(double t)
 
 	// TODO: student implementation goes here
 	// compute the value of a cubic quaternion spline at the value of t using Scubic
+	b0 = mCtrlPoints[0 + (4 * segment)];
+	b1 = mCtrlPoints[1 + (4 * segment)];
+	b2 = mCtrlPoints[2 + (4 * segment)];
+	b3 = mCtrlPoints[3 + (4 * segment)];
+
+	double tPrev = mKeys[segment].first;
+	double tNext = mKeys[segment + 1].first;
+	double u = (t - tPrev) / (tNext - tPrev);
+
+	q = q.Scubic(b0, b1, b2, b3, u);
 
 	return q;
 }
