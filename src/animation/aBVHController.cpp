@@ -8,7 +8,7 @@
 
 #pragma warning(disable:4018)
 
-BVHController::BVHController() 
+BVHController::BVHController()
 {
 	mActor = NULL;
 	mSkeleton = NULL;
@@ -18,20 +18,20 @@ BVHController::BVHController()
 
 BVHController::~BVHController()
 {
-    //clear();
+	//clear();
 }
 
 void BVHController::clear()
 {
-    mFilename = "";
+	mFilename = "";
 	mSkeleton->clear();
-    mRootMotion.clear();
-    mMotion.clear();
+	mRootMotion.clear();
+	mMotion.clear();
 }
 
 ASkeleton* BVHController::getSkeleton()
-{ 
-	return mSkeleton; 
+{
+	return mSkeleton;
 }
 
 const ASkeleton* BVHController::getSkeleton() const
@@ -75,240 +75,240 @@ void BVHController::update(double time, bool updateRootXZTranslation)
 
 bool BVHController::load(const std::string& filename)
 {
-    std::ifstream inFile(filename.c_str());
-    if (!inFile.is_open())
-    {
-        std::cout << "WARNING: Could not open " << filename.c_str() << std::endl;
-        return false;
-    }
+	std::ifstream inFile(filename.c_str());
+	if (!inFile.is_open())
+	{
+		std::cout << "WARNING: Could not open " << filename.c_str() << std::endl;
+		return false;
+	}
 
-    clear();
-    bool status = loadSkeleton(inFile) && loadMotion(inFile);
+	clear();
+	bool status = loadSkeleton(inFile) && loadMotion(inFile);
 
-    if (status)
-    {
-        mFilename = filename;
-    }
-    inFile.close();
-    return status;
+	if (status)
+	{
+		mFilename = filename;
+	}
+	inFile.close();
+	return status;
 }
 
 bool BVHController::loadSkeleton(std::ifstream& inFile)
 {
-    clear();
+	clear();
 
-    vec3 offsets;
-    std::string readString, jointname;
-    unsigned int channelCount;
+	vec3 offsets;
+	std::string readString, jointname;
+	unsigned int channelCount;
 	ASkeleton* skeleton = mActor->getSkeleton();
 
-    inFile >> readString;
-    if (readString != "HIERARCHY")
-        return false;
-    inFile >> readString;
-    if (readString != "ROOT" && readString != "JOINT")
-        return false;
-    inFile.get(); //" "
-    getline(inFile, jointname);// jointnode name
-    AJoint* jointnode = new AJoint(jointname);
+	inFile >> readString;
+	if (readString != "HIERARCHY")
+		return false;
+	inFile >> readString;
+	if (readString != "ROOT" && readString != "JOINT")
+		return false;
+	inFile.get(); //" "
+	getline(inFile, jointname);// jointnode name
+	AJoint* jointnode = new AJoint(jointname);
 	skeleton->addJoint(jointnode, true);
-    inFile >> readString; // "{"
-    inFile >> readString; // "OFFSET"
-    inFile >> offsets[0] >> offsets[1] >> offsets[2];
-    jointnode->setLocalTranslation(offsets);
-    inFile >> readString;
-    if (readString != "CHANNELS")
-        return false;
-    inFile >> channelCount;
-    jointnode->setNumChannels(channelCount);
-    getline(inFile, readString);	// " Xposition Yposition Zposition Zrotation Xrotation Yrotation"
-    jointnode->setRotationOrder(readString);
-    inFile >> readString;
-    while (readString != "}")
-    {
-        if (!loadJoint(inFile, jointnode, readString))
-        {
-            return false;
-        }
-        inFile >> readString;
-    }
-    if (readString != "}") return false;
+	inFile >> readString; // "{"
+	inFile >> readString; // "OFFSET"
+	inFile >> offsets[0] >> offsets[1] >> offsets[2];
+	jointnode->setLocalTranslation(offsets);
+	inFile >> readString;
+	if (readString != "CHANNELS")
+		return false;
+	inFile >> channelCount;
+	jointnode->setNumChannels(channelCount);
+	getline(inFile, readString);	// " Xposition Yposition Zposition Zrotation Xrotation Yrotation"
+	jointnode->setRotationOrder(readString);
+	inFile >> readString;
+	while (readString != "}")
+	{
+		if (!loadJoint(inFile, jointnode, readString))
+		{
+			return false;
+		}
+		inFile >> readString;
+	}
+	if (readString != "}") return false;
 
 	skeleton->update();
-    return true;
+	return true;
 }
 
 bool BVHController::loadJoint(std::ifstream &inFile, AJoint *pParent, std::string prefix)
 {
-    std::string readString, jointname;
-    vec3 offsets;
-    unsigned int channelCount;
+	std::string readString, jointname;
+	vec3 offsets;
+	unsigned int channelCount;
 	ASkeleton* skeleton = mActor->getSkeleton();
 
-    if (prefix == "JOINT")
-    {
-        inFile.get(); //" "
-        getline(inFile, jointname);// jointnode name
-        AJoint* jointnode = new AJoint(jointname);
+	if (prefix == "JOINT")
+	{
+		inFile.get(); //" "
+		getline(inFile, jointname);// jointnode name
+		AJoint* jointnode = new AJoint(jointname);
 
 		skeleton->addJoint(jointnode, false);
-        AJoint::Attach(pParent, jointnode);
-        inFile >> readString; // "{"
-        inFile >> readString; // "OFFSET"
-        inFile >> offsets[0] >> offsets[1] >> offsets[2];
-        jointnode->setLocalTranslation(offsets);
-        inFile >> readString; // "CHANNELS"
-        inFile >> channelCount;
-        jointnode->setNumChannels(channelCount);
+		AJoint::Attach(pParent, jointnode);
+		inFile >> readString; // "{"
+		inFile >> readString; // "OFFSET"
+		inFile >> offsets[0] >> offsets[1] >> offsets[2];
+		jointnode->setLocalTranslation(offsets);
+		inFile >> readString; // "CHANNELS"
+		inFile >> channelCount;
+		jointnode->setNumChannels(channelCount);
 
-        getline(inFile, readString);// " Zrotation Xrotation Yrotation"
-        jointnode->setRotationOrder(readString);
+		getline(inFile, readString);// " Zrotation Xrotation Yrotation"
+		jointnode->setRotationOrder(readString);
 
-        inFile >> readString; // "Joint" or "}" or "End"
-        while (readString != "}")
-        {
-            if (loadJoint(inFile, jointnode, readString) == false)
-                return false;
-            inFile >> readString; // "Joint" or "}" or "End"
-        }
-        return true;
-    }
-    else if (prefix == "End")
-    {
-        inFile.get(); //" "
-        getline(inFile, jointname);// jointnode name
-        if (jointname.find("Site") != std::string::npos)
-        {
-            jointname = pParent->getName() + "Site";
-        }
+		inFile >> readString; // "Joint" or "}" or "End"
+		while (readString != "}")
+		{
+			if (loadJoint(inFile, jointnode, readString) == false)
+				return false;
+			inFile >> readString; // "Joint" or "}" or "End"
+		}
+		return true;
+	}
+	else if (prefix == "End")
+	{
+		inFile.get(); //" "
+		getline(inFile, jointname);// jointnode name
+		if (jointname.find("Site") != std::string::npos)
+		{
+			jointname = pParent->getName() + "Site";
+		}
 
-        AJoint* jointnode = new AJoint(jointname);
-        jointnode->setNumChannels(0);
+		AJoint* jointnode = new AJoint(jointname);
+		jointnode->setNumChannels(0);
 		skeleton->addJoint(jointnode, false);
-        AJoint::Attach(pParent, jointnode);
-        inFile >> readString; // "{"
-        inFile >> readString; // "OFFSET"
-        inFile >> offsets[0] >> offsets[1] >> offsets[2];
-        jointnode->setLocalTranslation(offsets);
-        inFile >> readString; // "}"
-        return true;
-    }
-    else return false;
+		AJoint::Attach(pParent, jointnode);
+		inFile >> readString; // "{"
+		inFile >> readString; // "OFFSET"
+		inFile >> offsets[0] >> offsets[1] >> offsets[2];
+		jointnode->setLocalTranslation(offsets);
+		inFile >> readString; // "}"
+		return true;
+	}
+	else return false;
 }
 
 bool BVHController::loadMotion(std::ifstream& inFile)
 {
-    std::string readString;
-    unsigned int frameCount;
-    inFile >> readString;
-    if (readString != "MOTION")
-        return false;
-    inFile >> readString;
-    if (readString != "Frames:")
-        return false;
-    inFile >> frameCount;
-    inFile >> readString; // "Frame"
-    getline(inFile, readString); // " Time: 0.033333"
-    mDt = atof(&(readString.c_str()[6]));
-    mFps = 1.0 / mDt;
+	std::string readString;
+	unsigned int frameCount;
+	inFile >> readString;
+	if (readString != "MOTION")
+		return false;
+	inFile >> readString;
+	if (readString != "Frames:")
+		return false;
+	inFile >> frameCount;
+	inFile >> readString; // "Frame"
+	getline(inFile, readString); // " Time: 0.033333"
+	mDt = atof(&(readString.c_str()[6]));
+	mFps = 1.0 / mDt;
 
 	ASkeleton* skeleton = mActor->getSkeleton();
-    // Init rotation curves
+	// Init rotation curves
 	for (unsigned int i = 0; i < skeleton->getNumJoints(); i++)
-    {
-        ASplineQuat q;
-        q.setFramerate(mFps);
-        q.setInterpolationType(ASplineQuat::LINEAR);
-        mMotion[i] = q;
-    }
-    mRootMotion.setFramerate(mFps);
-    mRootMotion.setInterpolationType(ASplineVec3::LINEAR);
+	{
+		ASplineQuat q;
+		q.setFramerate(mFps);
+		q.setInterpolationType(ASplineQuat::LINEAR);
+		mMotion[i] = q;
+	}
+	mRootMotion.setFramerate(mFps);
+	mRootMotion.setInterpolationType(ASplineVec3::LINEAR);
 
-    // Read frames
-    for (unsigned int i = 0; i < frameCount; i++)
-    {
-       loadFrame(inFile);
-    }
+	// Read frames
+	for (unsigned int i = 0; i < frameCount; i++)
+	{
+		loadFrame(inFile);
+	}
 
-    mRootMotion.computeControlPoints();
-    mRootMotion.cacheCurve();
+	mRootMotion.computeControlPoints();
+	mRootMotion.cacheCurve();
 	for (unsigned int i = 0; i < skeleton->getNumJoints(); i++)
-    {
-        mMotion[i].cacheCurve();
-    }
-    return true;
+	{
+		mMotion[i].cacheCurve();
+	}
+	return true;
 }
 
 void BVHController::loadFrame(std::ifstream& inFile)
 {
-    float tx, ty, tz, r1, r2, r3;
-    double t = mDt * mRootMotion.getNumKeys();
+	float tx, ty, tz, r1, r2, r3;
+	double t = mDt * mRootMotion.getNumKeys();
 	ASkeleton* skeleton = mActor->getSkeleton();
 	for (unsigned int i = 0; i < skeleton->getNumJoints(); i++)
-    {
-        tx = ty = tz = 0.0f;
-        r1 = r2 = r3 = 0.0f;
+	{
+		tx = ty = tz = 0.0f;
+		r1 = r2 = r3 = 0.0f;
 
 		AJoint* pJoint = skeleton->getJointByID(i);
-        if (pJoint->getNumChannels() == 6)
-        {
-            inFile >> tx >> ty >> tz;
-            inFile >> r1 >> r2 >> r3;
-        }
-        else if (pJoint->getNumChannels() == 3)
-        {
-            inFile >> r1 >> r2 >> r3;
-        }
-        else
-        {
-        }
+		if (pJoint->getNumChannels() == 6)
+		{
+			inFile >> tx >> ty >> tz;
+			inFile >> r1 >> r2 >> r3;
+		}
+		else if (pJoint->getNumChannels() == 3)
+		{
+			inFile >> r1 >> r2 >> r3;
+		}
+		else
+		{
+		}
 
 		if (skeleton->getRootNode() == pJoint)
-        {
-            mRootMotion.appendKey(t, vec3(tx, ty, tz), false);
-        }
+		{
+			mRootMotion.appendKey(t, vec3(tx, ty, tz), false);
+		}
 
-        quat q = ComputeBVHRot(r1, r2, r3, pJoint->getRotationOrder());
-        mMotion[i].appendKey(t, q, false);
-    }
+		quat q = ComputeBVHRot(r1, r2, r3, pJoint->getRotationOrder());
+		mMotion[i].appendKey(t, q, false);
+	}
 }
 
 quat BVHController::ComputeBVHRot(float r1, float r2, float r3, const std::string& rotOrder) // For BVH
 {
-    mat3 m;
-    float ry, rx, rz;
+	mat3 m;
+	float ry, rx, rz;
 
-    if (rotOrder == "xyz")
-    {
-        rx = r1; ry = r2; rz = r3;
-        m.FromEulerAngles(mat3::XYZ, vec3(rx, ry, rz) * Deg2Rad);
-    }
-    else if (rotOrder == "xzy")
-    {
-        rx = r1; rz = r2; ry = r3;
+	if (rotOrder == "xyz")
+	{
+		rx = r1; ry = r2; rz = r3;
+		m.FromEulerAngles(mat3::XYZ, vec3(rx, ry, rz) * Deg2Rad);
+	}
+	else if (rotOrder == "xzy")
+	{
+		rx = r1; rz = r2; ry = r3;
 		m.FromEulerAngles(mat3::XZY, vec3(rx, ry, rz) * Deg2Rad);
-    }
-    else if (rotOrder == "yxz")
-    {
-        ry = r1; rx = r2; rz = r3;
+	}
+	else if (rotOrder == "yxz")
+	{
+		ry = r1; rx = r2; rz = r3;
 		m.FromEulerAngles(mat3::YXZ, vec3(rx, ry, rz) * Deg2Rad);
-    }
-    else if (rotOrder == "yzx")
-    {
-        ry = r1; rz = r2; rx = r3;
+	}
+	else if (rotOrder == "yzx")
+	{
+		ry = r1; rz = r2; rx = r3;
 		m.FromEulerAngles(mat3::YZX, vec3(rx, ry, rz) * Deg2Rad);
-    }
-    else if (rotOrder == "zxy")
-    {
-        rz = r1; rx = r2; ry = r3;
+	}
+	else if (rotOrder == "zxy")
+	{
+		rz = r1; rx = r2; ry = r3;
 		m.FromEulerAngles(mat3::ZXY, vec3(rx, ry, rz) * Deg2Rad);
-    }
-    else if (rotOrder == "zyx")
-    {
-        rz = r1; ry = r2; rx = r3;
+	}
+	else if (rotOrder == "zyx")
+	{
+		rz = r1; ry = r2; rx = r3;
 		m.FromEulerAngles(mat3::ZYX, vec3(rx, ry, rz) * Deg2Rad);
-    }
-    return m.ToQuaternion();
+	}
+	return m.ToQuaternion();
 }
 
 float BVHController::getDuration()

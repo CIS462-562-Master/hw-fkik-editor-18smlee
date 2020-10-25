@@ -11,19 +11,19 @@ ATransform::ATransform(const mat3& rot, const vec3& offset) : m_rotation(rot), m
 
 ATransform::ATransform(const ATransform& m)
 {
-    *this = m;
+	*this = m;
 }
 
 // Assignment operators
 ATransform& ATransform::operator = (const ATransform& orig)
 {
-    if (&orig == this)
-    {
-        return *this;
-    }
-    m_rotation = orig.m_rotation;
-    m_translation = orig.m_translation;
-    return *this;
+	if (&orig == this)
+	{
+		return *this;
+	}
+	m_rotation = orig.m_rotation;
+	m_translation = orig.m_translation;
+	return *this;
 }
 
 ATransform ATransform::Inverse() const
@@ -85,10 +85,10 @@ void ATransform::ReadFromGLMatrix(float* m)
 
 std::ostream& operator << (std::ostream& s, const ATransform& t)
 {
-    vec3 anglesRad;
-    t.m_rotation.ToEulerAngles(mat3::ZXY,anglesRad);
-    s << "R: " << anglesRad << " T: " << t.m_translation << " ";
-    return s;
+	vec3 anglesRad;
+	t.m_rotation.ToEulerAngles(mat3::ZXY, anglesRad);
+	s << "R: " << anglesRad << " T: " << t.m_translation << " ";
+	return s;
 }
 
 

@@ -10,7 +10,7 @@
 *
 ****************************************************************/
 
-AActor::AActor() 
+AActor::AActor()
 {
 	m_pInternalSkeleton = new ASkeleton();
 	m_pSkeleton = m_pInternalSkeleton;
@@ -48,24 +48,24 @@ AActor& AActor::operator = (const AActor& actor)
 
 AActor::~AActor()
 {
-	 delete m_IKController;
-	 delete m_BVHController;
-	 delete m_pInternalSkeleton;
+	delete m_IKController;
+	delete m_BVHController;
+	delete m_pInternalSkeleton;
 
 }
 
 void AActor::clear()
 {
 	// looks like it is clearing more times than the number of actors.  as a result, m_pSkeleton is not defined for last case.
-	m_pSkeleton->clear();  
+	m_pSkeleton->clear();
 
 	// code to update additional Actor data goes here
 }
 
 void AActor::update()
 {
-	if (!m_pSkeleton->getRootNode() )
-		 return; // Nothing loaded
+	if (!m_pSkeleton->getRootNode())
+		return; // Nothing loaded
 	else m_pSkeleton->update();
 
 	// code to update additional Actor data goes here
@@ -121,7 +121,7 @@ void AActor::solveFootIK(float leftHeight, float rightHeight, bool rotateLeft, b
 	m_pSkeleton->update();
 
 	// 2.	Update the character with Limb-based IK 
-	
+
 	// Rotate Foot
 	if (rotateLeft)
 	{

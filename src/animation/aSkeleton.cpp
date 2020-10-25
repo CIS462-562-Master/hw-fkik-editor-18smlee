@@ -86,18 +86,18 @@ void ASkeleton::copyHierarchy(const ASkeleton* inputSkeleton)
 void ASkeleton::copyTransforms(const ASkeleton* inputSkeleton)
 {
 	// assumes joint hiearchy (contained in mJoints) of input skeleton is the same.  only copies joint transform data
-	if ((inputSkeleton == this) )
+	if ((inputSkeleton == this))
 	{
 		return;
 	}
 
 	if (this->getNumJoints() != inputSkeleton->getNumJoints())
-		 assert(0);
+		assert(0);
 	else mJointCount = inputSkeleton->getNumJoints();
 
 	AJoint* pJointInput;
 	AJoint* pJoint;
-	 
+
 	for (int i = 0; i < mJointCount; i++) {
 		pJoint = this->mJoints[i];
 		pJointInput = inputSkeleton->mJoints[i];

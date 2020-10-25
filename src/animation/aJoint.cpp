@@ -9,29 +9,29 @@
 *
 ****************************************************************/
 AJoint::AJoint() :
-mId(-1),
-mName(""),
-mChannelCount(0),
-mRotOrder("xyz"),
-mDirty(false),
-mParent(0),
-mChildren(),
-mLocal2Parent(),
-mLocal2Global()
+	mId(-1),
+	mName(""),
+	mChannelCount(0),
+	mRotOrder("xyz"),
+	mDirty(false),
+	mParent(0),
+	mChildren(),
+	mLocal2Parent(),
+	mLocal2Global()
 {
 
 }
 
 AJoint::AJoint(const std::string& name) :
-mId(-1),
-mName(name),
-mChannelCount(0),
-mRotOrder("xyz"),
-mDirty(false),
-mParent(0),
-mChildren(),
-mLocal2Parent(),
-mLocal2Global()
+	mId(-1),
+	mName(name),
+	mChannelCount(0),
+	mRotOrder("xyz"),
+	mDirty(false),
+	mParent(0),
+	mChildren(),
+	mLocal2Parent(),
+	mLocal2Global()
 {
 
 }

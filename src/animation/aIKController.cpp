@@ -18,49 +18,49 @@ AIKchain::~AIKchain()
 
 }
 
-AJoint* AIKchain::getJoint(int index) 
-{ 
-	return mChain[index]; 
-}
-
-void AIKchain::setJoint(int index, AJoint* pJoint) 
-{ 
-	mChain[index] = pJoint; 
-}
-
-double AIKchain::getWeight(int index) 
-{ 
-	return mWeights[index]; 
-}
-
-void AIKchain::setWeight(int index, double weight) 
-{ 
-	mWeights[index] = weight; 
-}
-
-int AIKchain::getSize() 
-{ 
-	return mChain.size(); 
-}
-
-std::vector<AJoint*>& AIKchain::getChain() 
-{ 
-	return mChain; 
-}
-
-std::vector<double>& AIKchain::getWeights() 
-{ 
-	return mWeights; 
-}
-
-void AIKchain::setChain(std::vector<AJoint*> chain) 
+AJoint* AIKchain::getJoint(int index)
 {
-	mChain = chain; 
+	return mChain[index];
 }
 
-void AIKchain::setWeights(std::vector<double> weights) 
-{ 
-	mWeights = weights; 
+void AIKchain::setJoint(int index, AJoint* pJoint)
+{
+	mChain[index] = pJoint;
+}
+
+double AIKchain::getWeight(int index)
+{
+	return mWeights[index];
+}
+
+void AIKchain::setWeight(int index, double weight)
+{
+	mWeights[index] = weight;
+}
+
+int AIKchain::getSize()
+{
+	return mChain.size();
+}
+
+std::vector<AJoint*>& AIKchain::getChain()
+{
+	return mChain;
+}
+
+std::vector<double>& AIKchain::getWeights()
+{
+	return mWeights;
+}
+
+void AIKchain::setChain(std::vector<AJoint*> chain)
+{
+	mChain = chain;
+}
+
+void AIKchain::setWeights(std::vector<double> weights)
+{
+	mWeights = weights;
 }
 
 // AIKController class functions
@@ -225,11 +225,11 @@ int IKController::createLimbIKchains()
 	mRhandIKchain = createIKchain(mRhandID, desiredChainSize, &mIKSkeleton);
 	mLfootIKchain = createIKchain(mLfootID, desiredChainSize, &mIKSkeleton);
 	mRfootIKchain = createIKchain(mRfootID, desiredChainSize, &mIKSkeleton);
-	
+
 	if (mLhandIKchain.getSize() == 3 && mRhandIKchain.getSize() == 3 && mLfootIKchain.getSize() == 3 && mRfootIKchain.getSize() == 3)
 	{
 		validChains = true;
-		
+
 		// initalize end joint target transforms for Lhand, Rhand, Lfoot and Rfoot based on current position and orientation of joints
 		mIKSkeleton.copyTransforms(m_pSkeleton);
 		mLhandTarget.setLocal2Global(mIKSkeleton.getJointByID(mLhandID)->getLocal2Global());
@@ -265,20 +265,20 @@ int IKController::computeLimbIK(ATarget target, AIKchain& IKchain, const vec3 mi
 	double l2 = (pd - p_mid).Length();
 	vec3 rd = (p_end - p_start);
 
-	double phi = acos((l1*l1 + l2*l2 - t.Length() * t.Length()) / (2.0 * l1 * l2));
+	double phi = acos((l1*l1 + l2 * l2 - t.Length() * t.Length()) / (2.0 * l1 * l2));
 	double theta2 = M_PI - phi;
 
 	// set elbow joint to theta2
 	mat3 midJointRot = mat3();
 	midJointRot.FromAxisAngle(midJointAxis, theta2);
 	midJoint->setLocalRotation(midJointRot);
-	
+
 	// compute angle at joint 1 to orient rd to target
 	double alpha = acos(Dot(t, rd) / (t.Length() * rd.Length()));
 	vec3 axis = (rd.Cross(t) / (rd.Cross(t).Length()));
 
 	mat3 startJointRot = mat3();
-	startJointRot.FromAxisAngle(startJoint->getGlobalRotation().Transpose() * axis , alpha);
+	startJointRot.FromAxisAngle(startJoint->getGlobalRotation().Transpose() * axis, alpha);
 	startJoint->setLocalRotation(startJoint->getLocalRotation() * startJointRot);
 
 	m_pSkeleton->update();
@@ -415,7 +415,7 @@ int IKController::computeCCDIK(ATarget target, AIKchain& IKchain, ASkeleton* pIK
 			chain[i]->updateTransform();
 		}
 	}
-	
+
 	pIKSkeleton->update();
 
 	return true;
@@ -432,6 +432,6 @@ bool IKController::IKSolver_PseudoInv(int endJointID, const ATarget& target)
 bool IKController::IKSolver_Other(int endJointID, const ATarget& target)
 {
 	// TODO: Put Optional IK implementation or enhancements here
-	 
+
 	return true;
 }
