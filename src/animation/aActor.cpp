@@ -146,18 +146,32 @@ void AActor::solveFootIK(float leftHeight, float rightHeight, bool rotateLeft, b
 	if (rotateLeft)
 	{
 		// Update the local orientation of the left foot based on the left normal
+
+		vec3 yAxis = leftNormal;
+		vec3 xAxis = leftFoot->getGlobalRotation()[0];
+		vec3 zAxis = yAxis.Cross(xAxis);
+		mat3 rotMat = mat3(xAxis, yAxis, zAxis).Transpose();
+		leftFoot->setGlobalRotation(rotMat);
+
 		ATarget lTarget;
-		vec3 lTarget_gPos = lTarget.getGlobalTranslation();
-		lTarget.setGlobalTranslation(vec3(lTarget_gPos[0], leftHeight, lTarget_gPos[2]));
+		vec3 lTarget_gPos = leftFoot->getGlobalTranslation();
+		lTarget.setGlobalTranslation(vec3(lTarget_gPos[0], lTarget_gPos[1] + leftHeight, lTarget_gPos[2]));
 		m_IKController->IKSolver_Limb(m_IKController->mLfootID, lTarget);
 
 	}
 	if (rotateRight)
 	{
 		// Update the local orientation of the right foot based on the right normal
+
+		vec3 yAxis = rightNormal;
+		vec3 xAxis = rightFoot->getGlobalRotation()[0];
+		vec3 zAxis = yAxis.Cross(xAxis);
+		mat3 rotMat = mat3(xAxis, yAxis, zAxis).Transpose();
+		rightFoot->setGlobalRotation(rotMat);
+
 		ATarget rTarget;
-		vec3 rTarget_gPos = rTarget.getGlobalTranslation();
-		rTarget.setGlobalTranslation(vec3(rTarget_gPos[0], rightHeight, rTarget_gPos[2]));
+		vec3 rTarget_gPos = rightFoot->getGlobalTranslation();
+		rTarget.setGlobalTranslation(vec3(rTarget_gPos[0], rTarget_gPos[1] + rightHeight, rTarget_gPos[2]));
 		m_IKController->IKSolver_Limb(m_IKController->mRfootID, rTarget);
 	}
 	m_pSkeleton->update();
