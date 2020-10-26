@@ -1,4 +1,6 @@
 #include "aActor.h"
+#include<iostream> 
+#include<algorithm> 
 
 #pragma warning(disable : 4018)
 
@@ -105,6 +107,20 @@ void AActor::updateGuideJoint(vec3 guideTargetPos)
 	// 1.	Set the global position of the guide joint to the global position of the root joint
 	// 2.	Set the y component of the guide position to 0
 	// 3.	Set the global rotation of the guide joint towards the guideTarget
+
+	AJoint* root = m_pSkeleton->getRootNode();
+	vec3 rootPos = m_Guide.getLocal2Global() * root->getGlobalTranslation();
+	vec3 guidePos = m_Guide.getGlobalTranslation();
+	m_Guide.setGlobalTranslation(vec3(rootPos[0], 0, rootPos[2]));
+
+	vec3 targetLook = (guideTargetPos - guidePos).Normalize();
+	vec3 zAxis_tar = targetLook;
+	vec3 yAxis_tar = vec3(0, 1, 0);
+	vec3 xAxis_tar = yAxis_tar.Cross(zAxis_tar);
+	mat3 rotMat_target = mat3(xAxis_tar, yAxis_tar, zAxis_tar).Transpose();
+
+	m_Guide.setGlobalRotation(rotMat_target);
+	m_pSkeleton->update();
 }
 
 void AActor::solveFootIK(float leftHeight, float rightHeight, bool rotateLeft, bool rotateRight, vec3 leftNormal, vec3 rightNormal)
@@ -117,21 +133,32 @@ void AActor::solveFootIK(float leftHeight, float rightHeight, bool rotateLeft, b
 	// The normal and the height given are in the world space
 
 	// 1.	Update the local translation of the root based on the left height and the right height
-
+	vec3 root_locTrans = m_pSkeleton->getRootNode()->getLocalTranslation();
+	double root_leftHeight = root_locTrans[1] + leftHeight;
+	double root_rightHeight = root_locTrans[1] + rightHeight;
+	root_locTrans = vec3(root_locTrans[0], std::min(root_leftHeight, root_rightHeight), root_locTrans[2]);
+	m_pSkeleton->getRootNode()->setLocalTranslation(root_locTrans);
 	m_pSkeleton->update();
 
-	// 2.	Update the character with Limb-based IK 
+	// 2.	Update the charter with Limb-based IK 
 
 	// Rotate Foot
 	if (rotateLeft)
 	{
 		// Update the local orientation of the left foot based on the left normal
-		;
+		ATarget lTarget;
+		vec3 lTarget_gPos = lTarget.getGlobalTranslation();
+		lTarget.setGlobalTranslation(vec3(lTarget_gPos[0], leftHeight, lTarget_gPos[2]));
+		m_IKController->IKSolver_Limb(m_IKController->mLfootID, lTarget);
+
 	}
 	if (rotateRight)
 	{
 		// Update the local orientation of the right foot based on the right normal
-		;
+		ATarget rTarget;
+		vec3 rTarget_gPos = rTarget.getGlobalTranslation();
+		rTarget.setGlobalTranslation(vec3(rTarget_gPos[0], rightHeight, rTarget_gPos[2]));
+		m_IKController->IKSolver_Limb(m_IKController->mRfootID, rTarget);
 	}
 	m_pSkeleton->update();
 }
